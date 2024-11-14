@@ -1,18 +1,9 @@
 import { openai } from './ai.js'
 
-export const runLLM = async (prompt) => {
+export const runLLM = async (messages) => {
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: 'You are a helpful assistant.',
-      },
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
+    messages,
   })
 
   return response.choices[0].message.content

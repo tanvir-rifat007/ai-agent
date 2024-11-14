@@ -1,4 +1,5 @@
 import { runLLM } from './llm.js'
+import { addMessages, getMessages } from './memory.js'
 
 const args = process.argv[2]
 
@@ -8,6 +9,15 @@ if (!args) {
 }
 
 ;(async () => {
-  const response = await runLLM(args)
+  // user input added to the message:
+
+  addMessages([{ role: 'user', content: args }])
+
+  const messages = await getMessages()
+
+  const response = await runLLM(messages)
+
+  addMessages([{ role: 'assistant', content: response }])
+
   console.log(response)
 })()
