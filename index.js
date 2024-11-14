@@ -1,3 +1,5 @@
+import { z } from 'zod'
+import { runAgent } from './agent.js'
 import { runLLM } from './llm.js'
 import { addMessages, getMessages } from './memory.js'
 
@@ -9,15 +11,15 @@ if (!args) {
 }
 
 ;(async () => {
-  // user input added to the message:
+  const weatherTool = {
+    name: 'get_weather',
+    description: 'Get the weather for a location',
+    parameters: z.object({
+      reasoning: z.string().describe('why did you pick this tool?'),
+    }),
+  }
 
-  addMessages([{ role: 'user', content: args }])
-
-  const messages = await getMessages()
-
-  const response = await runLLM(messages)
-
-  addMessages([{ role: 'assistant', content: response }])
+  const response = await runAgent({ userMessage: args, tools: [weatherTool] })
 
   console.log(response)
 })()
