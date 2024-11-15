@@ -35,3 +35,13 @@ export const getMessages = async () => {
   const db = await getDB()
   return db.data.messages
 }
+
+export const saveToolResponse = async (toolCallId, toolResponse) => {
+  return addMessages([
+    {
+      role: 'tool',
+      content: toolResponse,
+      tool_call_id: toolCallId,
+    },
+  ])
+}

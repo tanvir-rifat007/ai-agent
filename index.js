@@ -19,7 +19,5 @@ if (!args) {
     }),
   }
 
-  const response = await runAgent({ userMessage: args, tools: [weatherTool] })
-
-  console.log(response)
+  await runAgent({ userMessage: args, tools: [weatherTool] })
 })()

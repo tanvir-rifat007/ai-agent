@@ -1,5 +1,6 @@
 import { runLLM } from './llm.js'
-import { addMessages, getMessages } from './memory.js'
+import { addMessages, getMessages, saveToolResponse } from './memory.js'
+import { runTool } from './toolRunner.js'
 import { showLoader, logMessage } from './ui.js'
 
 export const runAgent = async ({ userMessage, tools }) => {
@@ -8,14 +9,31 @@ export const runAgent = async ({ userMessage, tools }) => {
 
   const loader = showLoader('Running agent...')
 
-  const messages = await getMessages()
+  // agent loop
 
-  const response = await runLLM({ messages, tools })
+  while (true) {
+    const history = await getMessages()
+    const response = await runLLM({ messages: history, tools })
 
-  // agent response
-  await addMessages([response])
+    // assistant message(ai response)
+    await addMessages([response])
 
-  logMessage(response)
+    // if we get final result from the agent
+    if (response.content) {
+      loader.stop()
+      logMessage(response)
+      return getMessages()
+    }
 
-  loader.stop()
+    // if we get a tool call from the agent
+    if (response.tool_calls) {
+      const toolCall = response.tool_calls[0]
+      logMessage(response)
+      loader.update(`executing: ${toolCall.function.name}`)
+
+      const toolResponse = await runTool(toolCall, userMessage)
+      await saveToolResponse(toolCall.id, toolResponse)
+      loader.update(`done: ${toolCall.function.name}`)
+    }
+  }
 }
