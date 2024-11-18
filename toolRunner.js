@@ -1,8 +1,10 @@
-import OpenAI from 'openai'
-
-const getWeather = () => {
-  return 'The weather is sunny'
-}
+import { dadJoke, dadJokeToolDefinition } from './tools/dadJoke.js'
+import {
+  generateImage,
+  generateImageToolDefinition,
+} from './tools/generateImage.js'
+import { reddit, redditToolDefinition } from './tools/reddit.js'
+import { resumeTool, resumeToolDefinition } from './tools/resume.js'
 
 export const runTool = async (toolCall, userMessage) => {
   const input = {
@@ -11,9 +13,19 @@ export const runTool = async (toolCall, userMessage) => {
   }
 
   switch (toolCall.function.name) {
-    case 'get_weather':
-      return getWeather()
+    case generateImageToolDefinition.name:
+      return generateImage(input)
+
+    case redditToolDefinition.name:
+      return reddit(input)
+
+    case dadJokeToolDefinition.name:
+      return dadJoke(input)
+
+    case resumeToolDefinition.name:
+      return resumeTool(input)
+
     default:
-      throw new Error(`Unknown tool: ${toolCall.function.name}`)
+      return `Never run this tool: ${toolCall.function.name} again, or else!`
   }
 }
